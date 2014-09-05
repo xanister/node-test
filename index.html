@@ -1,23 +1,27 @@
 <!doctype html>
 <html>
     <head>
+        <title>Forest</title>
         <script src='//code.jquery.com/jquery-1.7.2.min.js'></script>
         <script src='http://forest.anslemgalaxy.com:3000/socket.io/socket.io.js'></script>
-        <script src="lib/GameClient.js" type="text/javascript"></script>        
-	<script src="game_engine.js" type="text/javascript"></script>
+        <script src="lib/NodeClient.js" type="text/javascript"></script>        
+	<script src="scavenger.js" type="text/javascript"></script>
         <style>
             body{
                 position: relative;
+                padding: 0;
+                margin: 0;
+                overflow: hidden;
             }
-            .uo{
-                position: absolute;
-                width: 32px;
-                height: 32px;
-                background-color: red;
+            #preload{
+                display: none;
             }
         </style>
     </head>
     <body>
-        <ul id='messages'></ul>
+        <div id="preload">
+            <img id="hero" src="assets/img/hero.png" />
+            <img id="zombie" src="assets/img/zombieSprite.png" />
+        </div>
     </body>
 </html>
