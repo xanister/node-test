@@ -13,10 +13,12 @@ IO = require('socket.io');
 
 /**
  * NodeServer
- *
+ * @param {function} connectCallback
+ * @param {function} disconnectCallback
+ * @param {function} inputCallback
  * @returns {NodeServer}
  */
-function NodeServer() {
+function NodeServer(connectCallback, disconnectCallback, inputCallback) {
     /**
      * IO socket
      * @access private
@@ -36,21 +38,36 @@ function NodeServer() {
      * @access public
      * @var function
      */
-    this.connectCallback = false;
+    this.connectCallback = connectCallback || false;
 
     /**
      * On client disconnect callback
      * @access public
      * @var function
      */
-    this.disconnectCallback = false;
+    this.disconnectCallback = disconnectCallback || false;
+
+    /**
+     * On client input callback
+     * @access public
+     * @var function
+     */
+    this.inputCallback = inputCallback || false;
 
     /**
      * Send message to all connected clients
      * @param {string} message
      */
     this.broadcast = function(message) {
-        socket.sockets.emit("message", message);
+        socket.sockets.emit("message", {time: this.getTime(), message: message});
+    };
+
+    /**
+     * Get current server time
+     * @returns {Date}
+     */
+    this.getTime = function() {
+        return new Date();
     };
 
     /**
@@ -67,20 +84,15 @@ function NodeServer() {
      * @param {string} message
      */
     this.message = function(clientId, message) {
-        this.clients[clientId].emit("message", message);
+        this.clients[clientId].emit("message", {time: this.getTime(), message: message});
     };
 
     /**
      * Start server
      * @param {integer} port
-     * @param {function} cCallback
-     * @param {function} dCallback
      */
-    this.start = function(port, cCallback, dCallback) {
+    this.start = function(port) {
         socket = IO.listen(port || 3000);
-
-        this.connectCallback = cCallback || false;
-        this.disconnectCallback = dCallback || false;
 
         // Listen for connections and bind events per client
         var nodeServer = this;
@@ -100,6 +112,8 @@ function NodeServer() {
             // Accept input
             client.on("clientInput", function(inputs) {
                 nodeServer.clients[client.id].inputs = inputs;
+                if (nodeServer.inputCallback)
+                    nodeServer.inputCallback({id: client.id, inputs: inputs});
             });
 
             // Update on disconnect
@@ -117,7 +131,7 @@ function NodeServer() {
      * @param {object} data
      */
     this.update = function(data) {
-        socket.sockets.emit("update", data);
+        socket.sockets.emit("update", {time: this.getTime(), data: data});
     };
 }
 

@@ -8,10 +8,14 @@
 
 /**
  * NodeClient
- *
+ * @param {function} messageCallback
+ * @param {function} updateCallback
+ * @param {function} connectCallback
+ * @param {function} disconnectCallback
+ * @param {function} errorCallback
  * @returns {NodeClient}
  */
-function NodeClient() {
+function NodeClient(messageCallback, updateCallback, connectCallback, disconnectCallback, errorCallback) {
     /**
      * IO socket
      * @access private
@@ -27,6 +31,13 @@ function NodeClient() {
     this.connected = false;
 
     /**
+     * Data synced to server
+     * @access public
+     * @var object
+     */
+    this.data = {};
+
+    /**
      * Client id
      * @access public
      * @var string
@@ -40,75 +51,81 @@ function NodeClient() {
      */
     this.inputs = {touchX: 0, touchY: 0, touchStartX: 0, touchStartY: 0, touchCount: 0};
 
-    /**
-     * Data synced to server
+    /*
+     * Server time update was last run
      * @access public
-     * @var object
+     * @var Date
      */
-    this.data = {};
+    this.lastInputTime = false;
 
     /**
      * Update server with client inputs
      */
     this.inputUpdate = function() {
-        socket.emit("clientInput", inputs);
+        socket.emit("clientInput", this.inputs);
     };
 
     /**
      * Connection callback
+     * @param {object} response
      */
-    this.onConnect = function() {
-        console.log("connection opened");
+    this.connectCallback = connectCallback || function(response) {
+        console.log("Connection opened. ID: " + response.id);
     };
 
     /**
      * Disconnect callback
      */
-    this.onDisconnect = function() {
-        console.log("connection closed");
+    this.disconnectCallback = disconnectCallback || function() {
+        console.log("Connection closed");
     };
 
     /**
      * Error callback
-     * @param {object} e
+     * @param {object} response
      */
-    this.onError = function(error) {
-        console.log(error);
+    this.errorCallback = errorCallback || function(response) {
+        console.log(response.error);
     };
 
     /**
      * Message recieved callback
-     * @param {string} message
+     * @param {string} response
      */
-    this.onMessage = function(message) {
-        console.log(message);
+    this.messageCallback = messageCallback || function(response) {
+        console.log(response.message);
     };
 
     /**
-     * Open connectionand bind server/input callback events
+     * Update data callback
+     */
+    this.updateCallback = updateCallback || false;
+
+    /**
+     * Open connection and bind server/input callback events
      * @param {string} serverAddress
      */
     this.start = function(serverAddress) {
         // Open connection
-        socket = io.connect(serverAddress);
+        socket = io.connect(serverAddress, {'sync disconnect on unload': true});
 
         // Bind events
         var nodeClient = this;
 
         /**
          * On error
-         * @param {object} error
+         * @param {object} response
          */
-        socket.on('error', function(error) {
-            nodeClient.onError(error);
+        socket.on('error', function(response) {
+            nodeClient.errorCallback(response);
         });
 
         /**
          * On message
-         * @param {string} message
+         * @param {string} response
          */
-        socket.on('message', function(message) {
-            nodeClient.onMessage(message);
+        socket.on('message', function(response) {
+            nodeClient.messageCallback(response);
         });
 
         /**
@@ -118,23 +135,26 @@ function NodeClient() {
         socket.on("connection", function(response) {
             nodeClient.id = response.id;
             nodeClient.connected = true;
-            nodeClient.onConnect(response);
+            nodeClient.connectCallback(response);
         });
 
         /**
          * On disconnect
+         * TODO: stop gracefully when server disappears unexpectedly
          */
         socket.on('disconnect', function() {
+            socket.disconnect();
             nodeClient.connected = false;
-            nodeClient.onDisconnect();
+            nodeClient.disconnectCallback();
         });
 
         /**
          * On update
-         * @param {object} data
+         * @param {object} response
          */
-        socket.on("update", function(data) {
-            nodeClient.data = data;
+        socket.on("update", function(response) {
+            nodeClient.data = response.data;
+            nodeClient.lastUpdateTime = response.time;
         });
 
         /**
