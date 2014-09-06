@@ -1,27 +1,23 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
     <head>
-        <title>Forest</title>
-        <script src='//code.jquery.com/jquery-1.7.2.min.js'></script>
-        <script src='http://forest.anslemgalaxy.com:3000/socket.io/socket.io.js'></script>
-        <script src="lib/NodeClient.js" type="text/javascript"></script>        
-	<script src="scavenger.js" type="text/javascript"></script>
-        <style>
-            body{
-                position: relative;
-                padding: 0;
-                margin: 0;
-                overflow: hidden;
-            }
-            #preload{
-                display: none;
-            }
-        </style>
+        <title>NodeClient Example</title>
     </head>
-    <body>
-        <div id="preload">
-            <img id="hero" src="assets/img/hero.png" />
-            <img id="zombie" src="assets/img/zombieSprite.png" />
+    <body>        
+        <div class="wrapper">
+            
         </div>
+        
+        <!-- Require socket.io -->
+        <script src='http://forest.anslemgalaxy.com:3000/socket.io/socket.io.js'></script>
+        
+        <!-- Node client -->
+        <script src="NodeClient.js" type="text/javascript"></script>        
+        
+        <!-- Basic example usage -->
+        <script type="text/javascript">
+            var nc = new NodeClient();
+            nc.start("http://forest.anslemgalaxy.com:3000");
+        </script>
     </body>
 </html>
