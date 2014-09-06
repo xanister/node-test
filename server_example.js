@@ -1,3 +1,9 @@
+/**
+ * server_example.js
+ * Basic example of node server
+ * Usage: nodejs server_example.js
+ */
+
 // Include the NodeServer
 var NodeServer = require("./NodeServer");
 
@@ -10,6 +16,7 @@ ns.connectCallback = function(client) {
     ns.broadcast(client.id + " has connected.");
 };
 ns.disconnectCallback = function(client) {
+    ns.message(client.id, "Goodbye " + client.id);
     ns.broadcast(client.id + " has disconnected.");
 };
 

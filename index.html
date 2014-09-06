@@ -9,21 +9,10 @@
         <!-- Require socket.io -->
         <script src='http://forest.anslemgalaxy.com:3000/socket.io/socket.io.js'></script>
         
-        <!-- Node client -->
+        <!-- Require NodeClient -->
         <script src="NodeClient.js" type="text/javascript"></script>        
         
         <!-- Basic example usage -->
-        <script type="text/javascript">
-            // Create new node client
-            var nc = new NodeClient();
-            
-            // Set callbacks as needed
-            nc.messageCallback = function (response){
-                document.getElementById("messages").innerHTML += ("<p>"+response.message+"</p>");
-            };
-            
-            // Start it up
-            nc.start("http://forest.anslemgalaxy.com:3000");
-        </script>
+        <script src="client_example.js" type="text/javascript"></script>
     </body>
 </html>
