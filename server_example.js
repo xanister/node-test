@@ -5,7 +5,7 @@
  */
 
 // Include the NodeServer
-var NodeServer = require("./NodeServer");
+var NodeServer = require("./lib/NodeServer");
 
 // Create the node server
 var ns = new NodeServer();
