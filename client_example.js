@@ -16,4 +16,4 @@ nc.messageCallback = function(response) {
 };
 
 // Start it up
-nc.start("http://forest.anslemgalaxy.com:3000");
+nc.start("http://example.com:3000");
